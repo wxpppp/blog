@@ -283,3 +283,19 @@ COPY container-disk /usr/bin/
 
 ENTRYPOINT ["/usr/bin/virt-handler"]
 ```
+## 后续
+上文中提到的通过`bazel`构建`container-disk`目标失败的问题解决了，我在官方仓库中发现了一个 pr，[add gcc library for local build on Arm64](https://github.com/kubevirt/kubevirt/pull/8627)，解决的问题正好是我遇到的问题。只不过架构不同，查看[修改的文件](https://github.com/kubevirt/kubevirt/pull/8627/files)，在该文件加入本地头文件的路径，编译成功。
+```
+diff --git a/bazel/toolchain/x86_64-none-linux-gnu/cc_toolchain_config.bzl b/bazel/toolchain/x86_64-none-linux-gnu/cc_toolchain_config.bzl
+index ea60b3806..af2772210 100644
+--- a/bazel/toolchain/x86_64-none-linux-gnu/cc_toolchain_config.bzl
++++ b/bazel/toolchain/x86_64-none-linux-gnu/cc_toolchain_config.bzl
+@@ -111,6 +111,7 @@ def _impl(ctx):
+         cxx_builtin_include_directories = [
+             "/usr/lib/gcc/x86_64-redhat-linux/8/include",
+             "/usr/include",
++           "/usr/lib/gcc/x86_64-linux-gnu/9/include",
+         ],
+         features = features,
+         toolchain_identifier = "x86_64-toolchain",
+```
